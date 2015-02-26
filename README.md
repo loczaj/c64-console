@@ -6,6 +6,8 @@ Using a special kernel module and a special console emulator program, keys hit o
 
 The project consists of 3 parts. A "server" program written in C64 assembly, a Linux kernel module named "c64_console", and the console emulator program.
 
+The project was developed as a hobby gadget in 2002-2003.
+
 ### Content of the directory tree:
 
 |  Path  | Description |
