@@ -1,5 +1,4 @@
-c64-console
------------
+## c64-console
 
 c64-console is a hobby project connecting Commodore 64 with Linux PC. With the help of this application and a simple cable Commodore 64 can be connected with a Linux PC. The PC can be used as a console for the good old C64.
 
@@ -7,8 +6,7 @@ Using a special kernel module and a special console emulator program, keys hit o
 
 The project consists of 3 parts. A "server" program written in C64 assembly, a Linux kernel module named "c64_console", and the console emulator program.
 
-Content of the directory tree:
-------------------------------
+### Content of the directory tree:
 
 |  Path  | Description |
 | ------ | ----------- |
