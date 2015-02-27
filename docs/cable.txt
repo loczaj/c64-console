@@ -1,0 +1,88 @@
+
+
+
+                  Cable specifications for c64-console v1.20
+                  ------------------------------------------
+
+
+
+o Legal notice
+
+  The author of this document shall not be held responsible 
+  for any physical or material injury which could occur from the
+  use of the information contained in this document. 
+  The information is provided 'as is'. It is the responsability
+  of the reader to take care of its own safety and of the safety
+  of his hardware.
+
+
+o What do you need to build the cable?
+
+  * DB25 Male Connector (1) + 10 wires shielded cable (1-3 meters)
+  * Or a paralell printer cable (1)
+
+  * 12+12 Board fittable connector, with 3.96 mm step (1)
+  * (Hard to find, but not impossible.)
+
+  * Solder iron, tin, screwdriver, knife, first aid kit, ...
+
+
+o How to connect the cable? 
+
+  The concept of the cable is very similar. The user port and 
+  paralell port data pins are connected. (The data lines are
+  used bidirectionally.) The PA2 pin of the user port 
+  is wired to the ACK pin of the paralell port. So the 
+  CIA chip can request PC interrupts via the pin ACK. 
+  The PC must be able to interrupt the Commodore, too. 
+  That is why the FLAG2 (C64) and INITIALIZE (PC) pins are 
+  connected.
+
+  Beware of connecting the user port connector to the Commodore,
+  it is easy to plug it upside down.
+
+  Beware of the voltages on the upper side of the port. See the notes 
+  below.
+
+                                               !!! = DANGER
+
+
+
+
+            !!!                             !!! !!!
+        GND +5V RST                         ~9V ~9V
+         1   2   3   4   5   6   7   8   9  10  11  12
+         _   _   _   _   _   _   _   _   _   _   _   _
+   _____|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_____
+  |                                                         |
+  |    V I C   U S E R   P O R T   ( R E A R   V I E W )    |
+  |_________________________________________________________|
+        |_| |_| |_| |_| |_| |_| |_| |_| |_| |_| |_| |_|
+  
+         A   B   C   D   E   F   H   J   K   L   M   N      
+        GND FLA PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PA2 GND     
+  
+         |  /|\ /|\ /|\ /|\ /|\ /|\ /|\ /|\ /|\  |   |
+         |   |   |   |   |   |   |   |   |   |   |   |
+         |   |   |   |   |   |   |   |   |   |   |   |<--- CABLE SHIELD
+         |   |   |   |   |   |   |   |   |   |   |   |
+         |   |  \|/ \|/ \|/ \|/ \|/ \|/ \|/ \|/ \|/  |
+ DB25
+ PIN    18  16   2   3   4   5   6   7   8   9  10  19   
+        GND INIT D0  D1  D2  D3  D4  D5  D6  D7 ACK GND
+      
+      (The pin numbers are written on the DB25 connector) 
+
+
+
+o Important Notes:
+
+1. This cable works with an IBM PC.
+
+2. BEWARE HOW THE USER PORT CONNECTOR IS TO BE PLUGGED (With 
+   all of the connections downside) because, it is easy to plug it
+   upside down. I recommend to mark the upper side of the connector.
+   
+3. BE EXTREMELY CAREFUL WHEN PLUGGING TO THE USER PORT.
+   NEVER PLUG THE CABLE WHILE THE C64 IS POWERED.
+

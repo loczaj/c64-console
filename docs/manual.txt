@@ -1,0 +1,262 @@
+
+
+
+                               C64 Console V1.20
+                               -----------------
+			      
+                          (C) 2002-2004 Lohner Roland
+
+
+
+
+o Table of contents
+
+
+   1.) Introduction
+     
+       . Features
+       . Components realised
+       . Requirements
+
+   2.) The cable, paralell ports
+
+       . Building the cable
+       . Cable stucture
+       . Paralell ports
+
+   3.) The device driver
+
+       . What is char 248.0 ?
+       . Features of the device
+       . Parameter
+       . Using insmod / kmod
+       . Inside the device driver
+
+   4.) The C64 program
+
+       . Operation
+       . Testing
+
+   5.) The console emulator
+
+       . Parameters
+       . Requirements
+       . Operation
+
+   6.) Compiling the C64 sources
+
+       . Using dasm
+       . Auto generate basic loader
+       . Version change
+     
+   7.) Thanks and respects
+
+   8.) Contact
+
+---
+
+
+1.) Introduction
+----------------
+
+o Features
+
+As you could read in README: With this application and a simple cable you
+will be able to connect your Linux PC to Commodore 64, and use your PC
+as a console of the C64.
+It means, that you can acces your C64 text console via the PC's keyboard
+and monitor. This solution supports neither any graphical modes, sprites,
+nor console colours. (Nice challenges.. :-) 
+All letter characters and the following control characters are handled:
+<cursor-left>, <cursor-right>, <cursor-up>, <cursor-down>, <delete>,
+<return>, <insert>, <home>, <clear>. The "run-stop" key is supported, too.
+ 
+o Components implemented
+
+    . Simple cable with 10 connections. (chapter 2.)
+    . Character device for Linux. (chapter 3.)
+    . "Console adapter" - CBM C64 assembly program. (chapter 4.)
+    . CBM console emulator for Linux. (chapter 5.)
+
+o Requirements
+
+You have to be Commodore fan. :-) I think, this requirement is met. :-)
+You can read about hardware-, software-, and another requirements in
+the install guide.
+
+
+2.) The cable, paralell ports
+-----------------------------
+
+The c64-console solution is based on a very simple cable.
+The structure and the building of the cable is described in the cable guide.
+
+The 8 databits of the paralell port and the 8 databits of the CBM user port
+are connected. This makes the 8 bit transmission possible in both communication
+directions. According to this concept, you have to use a bidirectional paralell
+port. All of the following paralell port modes support bidirectional transfer
+on the data lines:
+    
+    . bi-directional mode
+    . SPP mode with bi-directional support
+    . ECP mode (with "bi-dir" (or "byte", or "PS2") mode supported)
+  
+If your paralell port supports none of these modes, you can not
+and should not use this software. (Don't try this at home :-)
+The ECP mode supports bi-directional feature more often than not.
+
+Thanks to the protocoll, the establishing of a bus conflict is nearly
+impossible. Even by using a wrong type of paralell port, the probability of
+a bus conflict is very low, and the maximal duration of the conflict is
+10 microsecounds.
+
+Both devices at the ends of the cable must be able to interrupt each other,
+naturally. That is why the FLAG2 (C64) and INITIALIZE (PC) pins are connected,
+and the PA2 pin of the user port is wired to the ACK pin of the paralell port.
+
+
+3.) The device driver
+---------------------
+
+o What is char 248.0 ?
+
+Each device driver, which is responsible for some type of hardware, is assigned
+to its own major number. The list of drivers and their major numbers is 
+available in /proc/devices. Each physical device managed by a device driver is
+assigned to a minor number. The /dev directory is supposed to include a special
+file, called a device file, for each of those devices, whether or not it is 
+really installed on the system. The major device number 248 is preserved for
+experimental use. So we can use this for our purpose. The device driver 
+implemented for the project is placed in the directory 'linux-driver'. This
+driver sends characters written in the device file (/dev/ccons) to the 
+Commodore through the paralell port. On the other hand the driver reads and
+stores the characters sent by the Commodore, so they can be read from the
+device file. The device driver is implemented as kernel module ("c64_console").
+
+o Features of the device
+
+    . 1K circular read buffer
+          If the Commodore sends bytes, but the device file is not read
+	  at the same time, than this buffer stores the bytes until they are 
+	  read. 
+    . Read
+          Read from the read buffer of the device. 
+    . Write
+          Send a character to the C64.
+          No write buffer.
+    . Open
+          Open the device file. (important :-)
+    . Close
+          Close the device file. 
+    . Poll
+          It is possible to poll the device.
+          It means, you can check if there is something to read in the read
+	  buffer, or not. 
+
+o Module parameters
+
+The parameters of the module "c64_console" are the followings.
+
+    . io
+          The I/O base of paralell port. (default: 0x278)
+    . irq
+          The IRQ of paralell port. (default: 7)
+    
+o Using insmod / kmod
+
+To activate the device driver you have to load the kernel module "c64_console".
+There are two ways to do it. The first is the usage of the command 'insmod'.
+You have to be root to run this command. Parameters of 'insmod' are 
+the location of the kernel module object and the module parameters. For example:
+'insmod c64-console/linux-driver/c64_console.o irq=07 io=0x278' loads
+the module with the parameters given. You can list the kernel modules loaded
+by typing 'lsmod'. You can unload the kernel modules with 'rmmod'.
+For example 'rmmod c64_console'.
+
+The other way to load the kernel module is the use of kmod (kernel module
+loader). In this case you have not to load the module manually. You just have
+to copy the module object to a special location, configure the file
+/etc/modules.conf, and build the kernel module dependencies. 
+Than, if the device file /dev/ccons is accessed, the kernel module loads
+automatically. The configuration of kmod is described in detail in the install
+guide.
+
+o Inside the device driver
+
+This section wants to be a short description of the driver's operation.
+
+Receiving a byte from the Commodore. 
+The C64 clears and sets its PA2 pin. This pin is connected to ACK on the PC.
+So an interrupt is requested in the PC. Now C64 is waiting endless long for 
+being interrupted. If interrupted, C64 reads the data bus, and if it is free
+(read got 0xFF), puts the byte to be transmitted on the data lines for 10 
+microsecounds. 
+So in case of getting an interrupt, the device driver frees the data bus, sends 
+an interrupt (clears and sets INIT pin, which is connected to FLAG on C64) to 
+the C64. After this the driver reads the data bus 100 microsecounds long, and
+if something except 0xFF is read, than puts it to the read buffer.
+Why does C64 wait endless for the PC? Linux is not a real time operating
+system. So no delaytime limit is guaranted by handling interrupts. In other
+words it is possible, that Linux handles the interrupt more secounds 
+after the request.
+
+Sending a byte to the Commodore.
+The byte to send is placed on the data bus. The driver sends an interrupt 
+(clears and sets INIT pin, which is connected to FLAG on C64) to the C64.
+After 250 microsecounds the driver frees the data bus. It is guaranted, that
+this 250 microsecounds time is enaugh for the C64 for processing the byte.
+The character 0xFF will never be sent. The C64 may read 0xFF in case of
+a free data bus only. 
+
+
+4.) The C64 program
+-------------------
+
+o Operation
+
+If you start the C64 program (SYS 49152), it does the followings:
+
+. It redirects the OUTPUT vector to an own OUTPUT routine.
+. It redirects the NMI vector to an own NMI routine.
+. Disables all interrupts of CIA2.
+. Enables interrupt by incoming signal on the pin FLAG of the user port.
+. Switches all data lines to input mode.
+. Returns. :-)
+
+From this point on the "console adapter runs" on the C64.
+The data bits are in input mode. This is their standard status. They are
+switched to output mode only by sending a byte to the PC, and even in this
+case only after the bus is free for sure. The maximal duration of the 
+output mode is 10 microsecounds. On the other hand the PC keeps the data
+pins of the paralell port in input mode, too. The point of this concept is
+the avoiding of bus conflicts.
+
+Receiving a byte from the PC.
+The PC places the byte on the data bus and sends an interrupt to the C64
+through the pin FLAG. An NMI interrupt occurs, the adapter program's
+own NMI routine is executed. This routine checks if the interrupt signs
+free data bus for C64 or signs a transfer from the PC. If the data bus
+is free (read 0xFF) Y is set to 0xFF (the send routine is watinig for that).
+If the bus is not free, then the program reads the byte from the bus and
+places it in the keyboard buffer, or sets the stop flag.
+
+Sending a byte to the PC.
+(In the beginning :-) some CBM code wants to print a character to the
+Commodore's screen. Since the OUTPUT routine is redirected, the adapter's 
+OUTPUT routine is called. This sends an interrupt to the PC and than waits
+for Y to be 0xFF. If the PC replies with an interrupt while the data bus is
+free, the NMI routine sets Y to 0xFF. Then the adapter swithes the data lines
+to output for 10 microsecounds and places the byte to print on them. After
+this time the data pins are switched in input mode. 
+
+And all that in 124 bytes of code. :-)
+ 
+o Testing
+
+I used the file "command_seq" for testing. This file contains 50 times the
+line 'PRINT "ABCDEFGHIJKLMNOPQRSTUVXYZ"'. With this file I could test the
+duplex communication functionality. I sent this file in the device file 
+(cat command_seq > /dev/ccons) while the device file was catted in an 
+other console (cat /dev/ccons). The C64 got these lines and executed the
+commands: printed "ABCDEFGHIJKLMNOPQRSTUVXYZ". These characters came back
+from the C64 and were printed in the console.

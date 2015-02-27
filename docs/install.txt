@@ -1,0 +1,135 @@
+
+
+
+                  Installation notice for c64-console v1.20
+                  -----------------------------------------
+
+
+
+o Hardware requirements
+
+  * IBM PC, or compatible computer
+  * 1MB of free disk space
+  * Bi-directional paralell port, or
+    ECP paralell port with "bi-dir" (or "byte" / "PS2") mode supported
+  * Cable described in file "cable.txt"
+  * Commodore 64 computer with some storage
+
+
+o Software requirements
+
+  * Linux 2.4.x with loadable module support
+  * Linux includes in /usr/src/linux/include
+  * Gcc
+  * GNU make
+  * Ncurses (5) include: /usr/include/ncurses.h
+  * Ncurses (5) libs
+
+
+o Another requirements
+
+  * Root permission for installation
+
+
+o Setting the BIOS
+
+  * Enter the BIOS setting mode on your PC
+  * Switch on the paralell port and set its mode to one of the followings:
+    
+    . bi-directional mode
+    . SPP mode with bi-directional support
+    . ECP mode (with "bi-dir" (or "byte" / "PS2") mode supported)
+  
+    If your paralell port supports none of these modes, you can not
+    and should not use this software. Altough the ECP mode supports
+    bi-directional feature more often than not.
+
+  * Choose a free irq and a free base address for the paralell port
+    and note these settings.
+
+
+o Building the cable
+
+  * See file "cable.txt" for how to build the cable.
+
+
+o Linux part - the kernel module (kmod configuration)
+
+  * You need to have root permissions to install the kernel module.
+  
+  * Type 'make' in the linux-driver/ directory
+  * Copy c64_console.o from this dir to /lib/modules/2.4.x/kernel/drivers/char/,
+    where "2.4.x" is your kernelversion
+  * Add the following two lines to the file /etc/modules.conf:
+    
+    alias char-major-248   c64_console
+    options c64_console    irq=II io=0xBBB
+    
+    where "II" is the irq of the paralell port, and
+    "BBB" is the base address of the paralell port (see BIOS)
+    Default values: irq=07, io=0x278
+  * Create the ccons device by typing:
+    'mknod /dev/ccons c 248 0'
+  * Set permissions for reading and writing the device:
+    'chmod a+rw /dev/ccons'
+  * Handle dependency descriptions for loadable kernel modules
+    by typing 'depmod -a'
+
+
+o Linux part - the console application
+
+  * You need to have root permissions to install the console application.
+
+  * Type 'make' in the linux-console/ directory
+  * Copy the file 'console' to /usr/local/bin
+  * Set permissions for executing the application:
+    'chmod a+x /usr/local/bin/console'
+  
+
+o C64 part
+
+  * Either:
+    . Type the CBM BASIC program "loader.bas" of the c64/ directory
+    . Save it so that it can easily be retreived:
+       To disk: SAVE"LOADER",8
+       To tape: SAVE"LOADER",1
+    
+    . Hint: After you ran the basic loader prg, you can save the
+            binary with a monitor program: .S"ADAPTER",08,C000,C07C
+  
+  * Or:
+    . Copy the CBM binary program "adapter.prg" of the c64/ directory
+      to a 1541 floppy disk with Star Commander using an X1541 cable.
+
+
+o Running
+
+  * Power off the Commodore 64
+  * Connect the cable built to the paralell port and the Commodore user port.
+    Beware of connecting, it is easy to plug the connector upside down.
+  * Power on the Commodore 64
+  
+  * Either load the adapter program
+    . From disk: LOAD"ADAPTER",8,1
+    . From tape: LOAD"ADAPTER",1,1
+  
+  * Or load the BASIC loader program
+    . From disk: LOAD"LOADER",8
+    . From tape: LOAD"LOADER",1
+    And run it : RUN
+
+  * Start the adapter: SYS 49152
+  * Now you have no cursor while the kernel module 
+    "c64_console" is not loaded on the PC
+  * Hint: you can shut down the adapter by pressing runstop + restore keys
+
+  * Run the console application on the linux in a console / terminal with
+    minimal size 40x25: 'console'.
+  * Hint: You can use SVGATextMode to have 40x25 text consoles in the linux.
+          For that you need to be root and do the followings.
+          Add this new modeline to the file /etc/TextConfig:
+  
+          "40x25"  14.32  320 340 388 400  400 412 414 449  font 9x16
+
+          Start SVGATextMode: 'SVGATextMode 40x25'
+
