@@ -10,25 +10,26 @@ The project was developed as a hobby gadget in 2002-2003.
 
 ### Content of the directory tree:
 
-|  Path  | Description |
-| ------ | ----------- |
-| c64/   | C64-side of the project |
-| c64/Makefile | Makefile of C64 connector program |
-| c64/loader.bas | Basic loader of C64 connector program (generated) |
+|      Path      |                   Description                      |
+| -------------- | -------------------------------------------------- |
+| c64/           | C64-side of the project                            |
+| c64/Makefile   | Makefile of C64 connector program                  |
+| c64/loader.bas | Basic loader of C64 connector program (generated)  |
 | c64/server.asm | C64 connector source code written in 6502 assembly |
-| c64/server.prg | C64 loadable connector program image (generated) |
-|        |             |
-| docs/ | Documentation |
-| docs/cable | Specifications of the cable used |
-| docs/copying | GPL license |
-| docs/install | Install guide |
-| docs/manual | Manual |
-|        |             |
-| linux-console/ | C64 console emulator program based on Ncurses |
-| linux-console/Makefile | Makefile of console program |
-| linux-console/console.c | Source of console program |
-|  |  |
-| linux-module/ | The c64_console kernel module |
-| linux-module/Makefile | Makefile of c64_console kernel module |
-| linux-module/c64_console.c | Source of c64_console kernel module |
-| linux-module/command_seq | Basic command sequence for testing purposes |
+| c64/server.prg | C64 loadable connector program image (generated)   |
+|                |                                  |
+| docs/          | Documentation                    |
+| docs/cable     | Specifications of the cable used |
+| docs/copying   | GPL license                      |
+| docs/install   | Install guide                    |
+| docs/manual    | Manual                           |
+|                            |                                               |
+| linux-console/             | C64 console emulator program based on Ncurses |
+| linux-console/Makefile     | Makefile of console program                   |
+| linux-console/console.c    | Source of console program                     |
+|                            |                                             |
+| linux-module/              | The c64_console kernel module               |
+| linux-module/Makefile      | Makefile of c64_console kernel module       |
+| linux-module/c64_console.c | Source of c64_console kernel module         |
+| linux-module/command_seq   | Basic command sequence for testing purposes |
+
